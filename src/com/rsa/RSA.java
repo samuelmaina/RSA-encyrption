@@ -8,17 +8,18 @@ import java.util.*;
 
 public class RSA {
     private BigInteger valueOf1 = BigInteger.ONE;
-    Random rng = new Random();
-    int numberOfBits = 1024;
-    int bitPerPrime = numberOfBits / 2;
-    private BigInteger p = BigInteger.probablePrime(bitPerPrime, rng);
-    private BigInteger q = BigInteger.probablePrime(bitPerPrime, rng);
+
+    private int numberOfBits;
+    private BigInteger p;
+    private BigInteger q;
     private BigInteger e;
     private BigInteger modulus;
     private BigInteger n;
     private BigInteger d;
 
-    public RSA() {
+    public RSA(int numberOfBits) {
+        this.numberOfBits = numberOfBits;
+        setSetTheTwoBigPrimes();
         calculateN();
         calculateModulus();
         calculatePublicKeyE();
@@ -26,17 +27,17 @@ public class RSA {
 
     }
 
+    private void setSetTheTwoBigPrimes() {
+        Random rng = new Random();
+        int bitPerPrime = numberOfBits / 2;
+        p = BigInteger.probablePrime(bitPerPrime, rng);
+        q = BigInteger.probablePrime(bitPerPrime, rng);
+    }
+
     public ArrayList encryptString(String message) {
         try {
-
-            ArrayList encrypted = new ArrayList<BigInteger>();
-
-            byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
-            for (byte num : messageBytes
-            ) {
-                encrypted.add(encryptNum(num));
-            }
-            return encrypted;
+            String[] words = message.split(" ");
+            return encryptWords(words);
 
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
@@ -44,24 +45,57 @@ public class RSA {
 
     }
 
+    private ArrayList encryptWords(String[] words) {
+        ArrayList encrypted = new ArrayList<BigInteger>();
+        for (String word : words
+        ) {
+            BigInteger encoded = encodeWordIntoHexNumber(word);
+            encrypted.add(encryptNum(encoded));
+        }
+        return encrypted;
+    }
 
-    private BigInteger encryptNum(int msg) {
-        BigInteger message = BigInteger.valueOf(msg);
-        return message.modPow(e, n);
+    private BigInteger encodeWordIntoHexNumber(String word) {
+        String base16String = "";
+        byte[] bytes = word.getBytes(StandardCharsets.UTF_8);
+        for (byte c : bytes
+        ) {
+            String binString = Integer.toHexString((int) c);
+            base16String += binString;
+        }
+        return new BigInteger(base16String, 16);
+    }
+
+
+    public BigInteger encryptNum(BigInteger word) {
+        return word.modPow(e, n);
     }
 
     public String decrypt(ArrayList encrypted) {
         String decrypted = "";
         BigInteger listSize = BigInteger.valueOf(encrypted.size());
         for (BigInteger i = BigInteger.ZERO; haveNotExhaustedList(listSize, i); i = i.add(valueOf1)) {
-            String ch = getDecryptedChar(encrypted, i);
-            decrypted += ch;
+            String word = getDecrypedWord(encrypted, i);
+            if (i.equals(listSize.subtract(valueOf1))) {
+                decrypted += word;
+            } else
+                decrypted += (word + " ");
+
         }
         return decrypted;
     }
 
-    private String getDecryptedChar(ArrayList encrypted, BigInteger i) {
-        return Character.toString((decryptNum(parseCipherText(encrypted, i))));
+    private String getDecrypedWord(ArrayList encrypted, BigInteger i) {
+        BigInteger value = parseCipherText(encrypted, i);
+        String result = "";
+        BigInteger decryptedWord = decryptNum(value);
+        char[] wordToBase16 = decryptedWord.toString(16).toCharArray();
+        for (int j = 0; j < wordToBase16.length; j += 2) {
+            String st = "" + wordToBase16[j] + wordToBase16[j + 1];
+            char ch = (char) Integer.parseInt(st, 16);
+            result += ch;
+        }
+        return result;
     }
 
     private BigInteger parseCipherText(ArrayList encrypted, BigInteger i) {
@@ -72,8 +106,8 @@ public class RSA {
         return i.compareTo(size) < 0;
     }
 
-    public int decryptNum(BigInteger c) {
-        return (c.modPow(d, n)).intValue();
+    public BigInteger decryptNum(BigInteger c) {
+        return c.modPow(d, n);
     }
 
     public void calculateN() {
