@@ -22,31 +22,39 @@ public class RSATest {
 
     @Test
     public void shouldEncryptAndDecryptForSingleChars() {
-        int numberOfBits= 1024;
-        RSA rsa = new RSA(numberOfBits);
-        String message = "h";
-        testRsa(rsa, message);
+        int numberOfBits = 1024;
+        runRsa(numberOfBits, "h");
     }
 
     @Test
     public void shouldEncryptAndDecryptForLongString() {
-        RSA rsa = new RSA(1024);
         String message = "Lorem ipsum dolor sit amet " +
                 "consectetur adipisicing elit. In sit modi" +
                 " cumque ratione aliquam laudantium qui officiis" +
                 " porro! Rem placeat ducimus est, illum quasi blanditiis. " +
                 "Recusandae velit ad maiores expedita!";
-        testRsa(rsa, message);
+        runRsa(1024, message);
+    }
+
+
+    @Test
+    public void shouldEncyptAndDecryptNumbersAndNonAlphabets() {
+        int numberOfBits = 1024;
+        runRsa(numberOfBits, "?");
+        runRsa(numberOfBits, "1");
+    }
+
+    private void runRsa(int numberOfBits, String s) {
+        RSA rsa = new RSA(numberOfBits);
+        testRsa(rsa, s);
     }
 
     @Ignore("Takes a  lot of time approx. 56 seconds")
     @Test
     public void shouldDoForLongBits() {
-        int largeNoOfBits= 1024*10;
-        RSA rsa = new RSA(largeNoOfBits);
-        String message = "Lorem ipsum dolor sit amet " +
-                "consectetur adipisicing elit. In sit modi";
-        testRsa(rsa, message);
+        int largeNoOfBits = 1024 * 10;
+        runRsa(largeNoOfBits, "Lorem ipsum dolor sit amet " +
+                "consectetur adipisicing elit. In sit modi");
     }
 
 
@@ -64,23 +72,23 @@ public class RSATest {
 
     private void ensureTextIsEncrypted(ArrayList encrypted) {
         //The firstCipherText is bigint even if there is casting, proof of some encryption.
-        BigInteger firstCipherText= (BigInteger) encrypted.get(0);
-        int length= firstCipherText.toString().length();
-        int minimalEncryptedLength= 50;
+        BigInteger firstCipherText = (BigInteger) encrypted.get(0);
+        int length = firstCipherText.toString().length();
+        int minimalEncryptedLength = 50;
         //the first word of the test string is much less than minimalEncryptedLength  hence if the first produced cipher text
         //is greater than minimalEncryptedLength, this can be used as an indication of encryption.
-        Assert.assertTrue(length> minimalEncryptedLength);
+        Assert.assertTrue(length > minimalEncryptedLength);
     }
 
     private void ensureTextIsDividedIntoBlocks(String message, ArrayList encrypted) {
 
         //The text should be broken into words  in which each word is encypted as  a block.
         //Words are separated by blank space.
-        int expectedNumberOfBlocks= message.split(" ").length;
+        int expectedNumberOfBlocks = message.split(" ").length;
 
-        int numberOfEncryptedBlocks= encrypted.size();
+        int numberOfEncryptedBlocks = encrypted.size();
 
-        Assert.assertEquals(numberOfEncryptedBlocks,expectedNumberOfBlocks);
+        Assert.assertEquals(numberOfEncryptedBlocks, expectedNumberOfBlocks);
     }
 
 
