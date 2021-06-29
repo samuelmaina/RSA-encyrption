@@ -46,7 +46,7 @@ public class RSATest {
 
     private void runRsa(int numberOfBits, String s) {
         RSA rsa = new RSA(numberOfBits);
-        testRsa(rsa, s);
+        testRsa(numberOfBits,rsa, s);
     }
 
     @Ignore("Takes a  lot of time approx. 56 seconds")
@@ -58,10 +58,10 @@ public class RSATest {
     }
 
 
-    private void testRsa(RSA rsa, String message) {
+    private void testRsa(int numberOfBits, RSA rsa, String message) {
         ArrayList encrypted = rsa.encryptString(message);
         ensureTextIsDividedIntoBlocks(message, encrypted);
-        ensureTextIsEncrypted(encrypted);
+        ensureTextIsEncrypted(numberOfBits,encrypted);
         ensureTheMessageAndTheDecryptedTextAreTheSame(rsa, message, encrypted);
     }
 
@@ -70,14 +70,14 @@ public class RSATest {
         Assert.assertEquals(message, decrypted);
     }
 
-    private void ensureTextIsEncrypted(ArrayList encrypted) {
+    private void ensureTextIsEncrypted(int numberOfBits, ArrayList encrypted) {
         //The firstCipherText is bigint even if there is casting, proof of some encryption.
         BigInteger firstCipherText = (BigInteger) encrypted.get(0);
         int length = firstCipherText.toString().length();
-        int minimalEncryptedLength = 50;
         //the first word of the test string is much less than minimalEncryptedLength  hence if the first produced cipher text
         //is greater than minimalEncryptedLength, this can be used as an indication of encryption.
-        Assert.assertTrue(length > minimalEncryptedLength);
+        int expectedNumberOfDecimalDigits= (int) Math.round(Math.log10(2)*numberOfBits);
+        Assert.assertEquals(expectedNumberOfDecimalDigits,length);
     }
 
     private void ensureTextIsDividedIntoBlocks(String message, ArrayList encrypted) {
