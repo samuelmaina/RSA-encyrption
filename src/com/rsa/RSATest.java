@@ -80,6 +80,7 @@ public class RSATest {
     private void ensureTextIsDividedIntoBlocks(String message, ArrayList encrypted) {
 
         //The text should be broken into words  in which each word is encypted as  a block.
+        //array encrypted contains the encrypted words as elements
         //Words are separated by blank space.
         int expectedNumberOfBlocks = message.split(" ").length;
 
