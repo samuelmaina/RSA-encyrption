@@ -71,11 +71,8 @@ public class RSATest {
     }
 
     private void ensureTextIsEncrypted(int numberOfBits, ArrayList encrypted) {
-        //The firstCipherText is bigint even if there is casting, proof of some encryption.
         BigInteger firstCipherText = (BigInteger) encrypted.get(0);
         int length = firstCipherText.toString().length();
-        //the first word of the test string is much less than minimalEncryptedLength  hence if the first produced cipher text
-        //is greater than minimalEncryptedLength, this can be used as an indication of encryption.
         int expectedNumberOfDecimalDigits= (int) Math.round(Math.log10(2)*numberOfBits);
         Assert.assertEquals(expectedNumberOfDecimalDigits,length);
     }
